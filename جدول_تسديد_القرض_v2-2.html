@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدول تسديد القرض</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+  font-family:'Cairo',sans-serif;
+  background:#0f1117;
+  color:#f0f0f0;
+  min-height:100vh;
+  direction:rtl;
+}
+
+/* ── HEADER ── */
+.header{
+  background:linear-gradient(135deg,#1a1f2e 0%,#16213e 100%);
+  border-bottom:2px solid #c0392b;
+  padding:24px 20px 20px;
+  text-align:center;
+}
+.header h1{
+  font-size:22px;
+  font-weight:900;
+  color:#fff;
+  margin-bottom:4px;
+  letter-spacing:1px;
+}
+.header p{ font-size:13px; color:#888; }
+
+/* ── CARDS ── */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:16px 14px 0;
+}
+.card{
+  background:#1a1f2e;
+  border-radius:14px;
+  padding:14px 12px;
+  text-align:center;
+  border:1px solid #2a2f3e;
+  transition:transform .2s;
+}
+.card:hover{ transform:translateY(-2px); }
+.card .num{
+  font-size:17px;
+  font-weight:900;
+  margin-bottom:4px;
+}
+.card .lbl{
+  font-size:11px;
+  color:#666;
+}
+.card.c-red  .num{ color:#e74c3c; }
+.card.c-grn  .num{ color:#2ecc71; }
+.card.c-blue .num{ color:#3498db; }
+
+/* ── PROGRESS ── */
+.prog-section{
+  padding:14px 14px 0;
+}
+.prog-header{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:#888;
+  margin-bottom:8px;
+}
+.bar-bg{
+  height:12px;
+  background:#1a1f2e;
+  border-radius:99px;
+  overflow:hidden;
+  border:1px solid #2a2f3e;
+}
+.bar-fill{
+  height:100%;
+  background:linear-gradient(90deg,#c0392b,#e74c3c);
+  border-radius:99px;
+  transition:width .5s ease;
+}
+.pct-text{
+  text-align:center;
+  font-size:11px;
+  color:#555;
+  margin-top:5px;
+}
+
+/* ── HINT ── */
+.hint{
+  text-align:center;
+  font-size:12px;
+  color:#555;
+  padding:10px 14px 0;
+}
+.hint span{
+  background:#1a1f2e;
+  border:1px solid #2a2f3e;
+  padding:4px 12px;
+  border-radius:99px;
+  display:inline-block;
+}
+
+/* ── TABLE ── */
+.tbl-wrap{
+  padding:12px 14px 30px;
+  overflow-x:auto;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+}
+thead th{
+  font-size:11px;
+  font-weight:700;
+  color:#555;
+  padding:6px 10px;
+  text-align:center;
+  letter-spacing:1px;
+}
+.row{
+  background:#1a1f2e;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .2s;
+  border:1px solid #2a2f3e;
+}
+.row:hover{
+  border-color:#e74c3c;
+  transform:scale(1.01);
+}
+.row td{
+  padding:12px 10px;
+  text-align:center;
+  font-size:13px;
+  font-weight:600;
+}
+.row td:first-child{
+  border-radius:10px 0 0 10px;
+}
+.row td:last-child{
+  border-radius:0 10px 10px 0;
+}
+
+/* PAID ROW */
+.row.paid{
+  background:#2a0a0a;
+  border-color:#c0392b;
+}
+.row.paid .month-name{
+  color:#e74c3c;
+  font-weight:900;
+}
+.row.paid .num-cell{
+  color:#ff6b6b;
+}
+.row.paid .rem-cell{
+  color:#ff6b6b;
+}
+
+/* STATUS BADGE */
+.badge{
+  display:inline-block;
+  font-size:10px;
+  padding:3px 10px;
+  border-radius:99px;
+  font-weight:700;
+}
+.badge-paid{
+  background:#c0392b;
+  color:#fff;
+}
+.badge-pending{
+  background:#2a2f3e;
+  color:#555;
+}
+.badge-done{
+  background:#1a4a2a;
+  color:#2ecc71;
+}
+
+/* LAST ROW */
+.row.last-row{
+  background:#0a1a0a;
+  border-color:#2ecc71;
+}
+.row.last-row.paid .month-name{ color:#2ecc71; }
+
+/* RESET BTN */
+.reset-wrap{
+  text-align:center;
+  padding:0 14px 10px;
+}
+.reset-btn{
+  background:transparent;
+  border:1px solid #2a2f3e;
+  color:#555;
+  padding:7px 20px;
+  border-radius:99px;
+  font-family:'Cairo',sans-serif;
+  font-size:12px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.reset-btn:hover{
+  border-color:#e74c3c;
+  color:#e74c3c;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 جدول تسديد القرض</h1>
+  <p>اضغط على الشهر لتسجيله مسدداً · يبدأ من يوليو 2026</p>
+</div>
+
+<div class="cards">
+  <div class="card c-red">
+    <div class="num">20,000,000</div>
+    <div class="lbl">💰 إجمالي الدين</div>
+  </div>
+  <div class="card c-blue">
+    <div class="num" id="c-paid">0</div>
+    <div class="lbl">✅ إجمالي المسدد</div>
+  </div>
+  <div class="card c-grn">
+    <div class="num" id="c-rem">20,000,000</div>
+    <div class="lbl">📌 المتبقي</div>
+  </div>
+</div>
+
+<div class="prog-section">
+  <div class="prog-header">
+    <span id="prog-paid-lbl">المسدد: 0 دينار</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="bar-bg">
+    <div class="bar-fill" id="bar" style="width:0%"></div>
+  </div>
+  <div class="pct-text" id="prog-months">0 من 40 قسط مسدد</div>
+</div>
+
+<div class="hint">
+  <span>👆 اضغط على أي شهر لتحديده بالأحمر كمسدد · اضغط ثانياً للإلغاء</span>
+</div>
+
+<div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الشهر</th>
+        <th>القسط</th>
+        <th>مجموع المسدد</th>
+        <th>المتبقي</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody id="tbl"></tbody>
+  </table>
+</div>
+
+<div class="reset-wrap">
+  <button class="reset-btn" onclick="resetAll()">🔄 إعادة تعيين الكل</button>
+</div>
+
+<script>
+var MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+var TOTAL   = 20000000;
+var MONTHLY = 500000;
+var COUNT   = Math.ceil(TOTAL / MONTHLY); // 40
+var KEY     = 'loan_paid_months_v2';
+
+// load saved state
+var saved = {};
+try{ saved = JSON.parse(localStorage.getItem(KEY) || '{}'); }catch(e){}
+
+function fmt(n){ return Math.round(n).toLocaleString('en'); }
+
+// build rows data
+var rows = [];
+var m = 6, y = 2026, rem = TOTAL, paid = 0;
+for(var i=1; i<=COUNT; i++){
+  var pay = Math.min(MONTHLY, rem);
+  paid += pay;
+  rem  -= pay;
+  rows.push({ idx:i, m:m, y:y, pay:pay, cumPaid:paid, rem:rem });
+  m++; if(m>11){ m=0; y++; }
+}
+
+// render
+function render(){
+  var tb = document.getElementById('tbl');
+  tb.innerHTML = '';
+
+  var paidCount = 0;
+  var totalPaid = 0;
+
+  rows.forEach(function(r){
+    var isPaid = !!saved[r.idx];
+    if(isPaid){ paidCount++; totalPaid += r.pay; }
+  });
+
+  // running sums for display
+  var runPaid = 0, runRem = TOTAL;
+  rows.forEach(function(r){
+    var isPaid = !!saved[r.idx];
+    if(isPaid){ runPaid += r.pay; runRem -= r.pay; }
+
+    var isLast = r.idx === COUNT;
+
+    var tr = document.createElement('tr');
+    tr.className = 'row' + (isPaid?' paid':'') + (isLast?' last-row':'');
+    tr.onclick = (function(idx){ return function(){ toggle(idx); }; })(r.idx);
+
+    // cumulative shown only for paid rows; otherwise show projected
+    var showCum  = isPaid ? fmt(runPaid)    : fmt(r.cumPaid);
+    var showRem  = isPaid ? fmt(runRem)     : fmt(r.rem);
+    var remColor = (r.rem===0) ? '#2ecc71'  : (isPaid?'#ff6b6b':'#aaa');
+
+    var badge = isLast && isPaid
+      ? '<span class="badge badge-done">✅ منتهي</span>'
+      : isPaid
+        ? '<span class="badge badge-paid">🔴 مسدد</span>'
+        : '<span class="badge badge-pending">⬜ متبقي</span>';
+
+    tr.innerHTML =
+      '<td style="color:#444;font-size:12px">'+ r.idx +'</td>'+
+      '<td class="month-name">'+ MONTHS[r.m]+' '+r.y+'</td>'+
+      '<td class="num-cell">'+ fmt(r.pay)+' د</td>'+
+      '<td style="color:'+(isPaid?'#e74c3c':'#555')+';font-size:12px">'+ showCum+' د</td>'+
+      '<td class="rem-cell" style="color:'+remColor+'">'+ (r.rem===0?'✅ منتهي':showRem+' د') +'</td>'+
+      '<td>'+ badge +'</td>';
+
+    tb.appendChild(tr);
+  });
+
+  // update summary
+  var pct = Math.round(totalPaid/TOTAL*100);
+  document.getElementById('c-paid').textContent = fmt(totalPaid);
+  document.getElementById('c-rem').textContent  = fmt(TOTAL-totalPaid);
+  document.getElementById('bar').style.width    = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-paid-lbl').textContent = 'المسدد: '+fmt(totalPaid)+' دينار';
+  document.getElementById('prog-months').textContent   = paidCount+' من '+COUNT+' قسط مسدد';
+}
+
+function toggle(idx){
+  if(saved[idx]) delete saved[idx];
+  else saved[idx] = true;
+  try{ localStorage.setItem(KEY, JSON.stringify(saved)); }catch(e){}
+  render();
+}
+
+function resetAll(){
+  if(!confirm('تريد إعادة تعيين الكل؟')) return;
+  saved = {};
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
